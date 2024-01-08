@@ -1,7 +1,7 @@
- var mqttHandler = require('./mqttHandler');
+var mqttHandler = require("./mqttHandler");
 
- var mqttClient = new mqttHandler();
+var mqttClient = new mqttHandler();
 
- mqttClient.connect();
+mqttClient.connect();
 
- module.exports = mqttClient;
+module.exports = mqttClient;

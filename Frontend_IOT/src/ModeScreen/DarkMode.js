@@ -1,8 +1,8 @@
 import React from "react";
-import '../App.css'
+import "../App.css";
 
 const DarkMode = () => {
-    let clickedClass = "clicked"
+    let clickedClass = "clicked";
     const body = document.body;
     const lightTheme = "light";
     const darkTheme = "dark";
@@ -37,5 +37,5 @@ const DarkMode = () => {
             onClick={(e) => switchTheme(e)}
         ></button>
     );
-}
-export default DarkMode
+};
+export default DarkMode;

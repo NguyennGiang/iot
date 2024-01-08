@@ -1,13 +1,13 @@
-import {toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 export const toastSuccess = (title, timeout = 1000) => {
-    toast.success(title, { autoClose: timeout })
-}
+    toast.success(title, { autoClose: timeout });
+};
 
-export const toastError = (title ="Đã xảy ra lỗi", timeout = 2000) => {
-    toast.error(title, { autoClose: timeout })
-}
+export const toastError = (title = "Đã xảy ra lỗi", timeout = 2000) => {
+    toast.error(title, { autoClose: timeout });
+};
 
 export const toastWarning = (title, timeout = 1000) => {
-    toast.warning(title, { autoClose: timeout })
-}
+    toast.warning(title, { autoClose: timeout });
+};
