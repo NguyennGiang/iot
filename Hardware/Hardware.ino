@@ -6,8 +6,8 @@
 #include <DHT.h>
 #include <ArduinoJson.h>
 
-#define WLAN_SSID "IT Hoc Bach Khoa"
-#define WLAN_PASS "chungtalamotgiadinh"
+#define WLAN_SSID ""
+#define WLAN_PASS ""
 
 #define SERVER "broker.hivemq.com"
 #define SERVERPORT 1883
@@ -24,12 +24,14 @@ DHT dht(DHTPIN, DHTTYPE);
 void MQTT_connect();
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(10);
+  pinMode(DHTPIN, INPUT_PULLUP);
 
   Serial.println("DHT11 MQTT Publisher");
   Serial.print("Connecting to ");
   Serial.println(WLAN_SSID);
+  Serial.println(ESP.getEfuseMac());
 
   WiFi.begin(WLAN_SSID, WLAN_PASS);
   while (WiFi.status() != WL_CONNECTED) {
@@ -56,11 +58,10 @@ void loop() {
   if (isnan(h) || isnan(t)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
-    delay(2000);
+    delay(1000);
     String message = "\{\"Temperature\": " + String(t);
-
+    message = message + ", \"EmbedId\": " + String(ESP.getEfuseMac());
     message = message + ", \"Humidity\": " + String(h) + "}";
-
     Serial.println(message);
 
     char buffer[message.length() + 1];
@@ -69,7 +70,7 @@ void loop() {
     node.publish(buffer);
   }
 
-  delay(10000);
+  delay(1000);
 }
 
 void MQTT_connect() {

@@ -1,23 +1,22 @@
-const Device = require('../model/device');
-const User = require('../model/user')
-var mongoose = require('mongoose');
-var mqttClient = require('../mqttWrapper/mqttClient');
-
+const Device = require("../model/device");
+const User = require("../model/user");
+var mongoose = require("mongoose");
+var mqttClient = require("../mqttWrapper/mqttClient");
 
 function validatorForValidId(req, res) {
     try {
         mongoose.Types.ObjectId(req);
     } catch (e) {
         res.status(404).send({
-            error: "id must be single String of 12 bytes or a string of 24 hex characters"
-        })
+            error: "id must be single String of 12 bytes or a string of 24 hex characters",
+        });
     }
 }
 
 async function validatorForDeviceExists(req, res) {
-    let device = await Device.findOne({embedId:req.body.embedId})
+    let device = await Device.findOne({ embedId: req.body.embedId });
     if (device) {
-        res.status(404).send({error: "Device is existed"})
+        res.status(404).send({ error: "Device is existed" });
     }
 }
 
@@ -25,12 +24,12 @@ module.exports = {
     getAllDevice: async (req, res) => {
         try {
             let devices = await Device.find();
-            res.send({devices});
+            res.send({ devices });
         } catch (error) {
             res.status(500).send({
                 success: false,
-                error: "Internal Server Error!"
-            })
+                error: "Internal Server Error!",
+            });
         }
     },
 
@@ -40,62 +39,61 @@ module.exports = {
             const deviceId = req.params.deviceId;
             let device = await Device.findById(deviceId);
             if (!device) {
-                res.status(404).send({error: "Device not found"})
+                res.status(404).send({ error: "Device not found" });
             } else {
-                res.status(200).send({device})
+                res.status(200).send({ device });
             }
         } catch (error) {
             res.status(500).send({
                 success: false,
-                error: "Internal Server Error!"
-            })
+                error: "Internal Server Error!",
+            });
         }
     },
 
     getDeviceByEmbedId: async (req, res) => {
         try {
-            let device = await Device.findOne({embedId:req.params.embedId})
+            let device = await Device.findOne({ embedId: req.params.embedId });
             if (!device) {
-                res.status(404).send({error: "Device not found"})
+                res.status(404).send({ error: "Device not found" });
             } else {
-                res.status(200).send({device})
+                res.status(200).send({ device });
             }
         } catch (error) {
             res.status(500).send({
                 success: false,
-                error: "Internal Server Error!"
-            })
+                error: "Internal Server Error!",
+            });
         }
     },
 
     createDeviceByUserId: async (req, res) => {
-        
         validatorForValidId(req.params.userId, res);
-        await validatorForDeviceExists(req,res);
+        await validatorForDeviceExists(req, res);
         try {
             let user = await User.findById(req.params.userId);
             if (!user) {
                 res.send({
-                    error: "User doesn't exist!"
-                })
+                    error: "User doesn't exist!",
+                });
             } else {
                 let device = await Device.createDevice(req.body);
-                if(req.user.role == "admin") {
-                    device.isPublic = true
+                if (req.user.role == "admin") {
+                    device.isPublic = true;
                 }
                 if (!device) {
-                    res.status(404).send({error: "Device not found"})
+                    res.status(404).send({ error: "Device not found" });
                 }
                 device.userId = req.params.userId;
                 await device.save();
-                res.send({device})
+                res.send({ device });
             }
         } catch (error) {
             console.log(error);
             res.status(500).send({
                 success: false,
-                error: "Internal Server Error!"
-            })
+                error: "Internal Server Error!",
+            });
         }
     },
 
@@ -106,19 +104,23 @@ module.exports = {
             await Device.findByIdAndUpdate(deviceId, req.body);
             let device = await Device.findById(deviceId);
             if (device) {
-                res.status(200).send({device});
+                res.status(200).send({ device });
 
-                const pubTopic = 'nhom10iot/' + device.embedId + '/command';
-                mqttClient.sendMessage(pubTopic, JSON.stringify({
-                    connectState: device.connectState
-                }));
-            }else {
-                res.status(404).send({error: "Device not found"})
+                const pubTopic = "nhom10iot/" + device.embedId + "/command";
+                console.log(pubTopic, device.connectState);
+                mqttClient.sendMessage(
+                    pubTopic,
+                    JSON.stringify({
+                        connectState: device.connectState,
+                    })
+                );
+            } else {
+                res.status(404).send({ error: "Device not found" });
             }
         } catch (e) {
             res.status(500).send({
-                error: "Internal Server Error"
-            })
+                error: "Internal Server Error",
+            });
         }
     },
 
@@ -132,34 +134,33 @@ module.exports = {
                 humidity: req.body.humidity,
                 co2: req.body.co2,
                 dust: req.body.dust,
-            })
+            });
             await device.save();
-            res.status(200).send({device})
-        }else {
-            res.status(404).send({error: "Device not found"})
+            res.status(200).send({ device });
+        } else {
+            res.status(404).send({ error: "Device not found" });
         }
-
     },
 
     deleteDeviceByDeviceId: async (req, res) => {
         try {
-            validatorForValidId(req.params.deviceId, res)
+            validatorForValidId(req.params.deviceId, res);
             await Device.findByIdAndDelete(req.params.deviceId);
-            res.status(204).send({})
+            res.status(204).send({});
         } catch (e) {
             res.status(500).send({
-                error: "Internal Server Error"
-            })
+                error: "Internal Server Error",
+            });
         }
     },
 
     getPublicDevice: async (req, res) => {
-        console.log(123)
+        console.log(123);
         try {
-            const devices = await Device.find({isPublic: true})
-            res.status(200).send(devices)
+            const devices = await Device.find({ isPublic: true });
+            res.status(200).send(devices);
         } catch (e) {
-            res.status(500).send(e)
+            res.status(500).send(e);
         }
-    }
-}
+    },
+};
